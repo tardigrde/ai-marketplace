@@ -1,0 +1,24 @@
+{
+  "name": "swe-agent",
+  "description": "Autonomous software engineering agent that orchestrates code review, testing, and documentation",
+  "capabilities": [
+    "review-code",
+    "generate-tests",
+    "write-docs",
+    "analyze-changes"
+  ],
+  "triggers": [
+    {
+      "event": "manual",
+      "command": "/swe:review"
+    },
+    {
+      "event": "manual",
+      "command": "/swe:test"
+    }
+  ],
+  "settings": {
+    "model": "default",
+    "tools": ["read", "write", "bash", "grep", "glob"]
+  }
+}
