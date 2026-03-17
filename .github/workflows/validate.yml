@@ -1,0 +1,33 @@
+name: Validate Marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: tools/cli
+        run: pip install -r requirements.txt
+
+      - name: Validate marketplace
+        working-directory: tools/cli
+        run: python -m cli validate --path ../../.github/plugin/marketplace.json
+
+      - name: List plugins
+        working-directory: tools/cli
+        run: python -m cli list
+
+      - name: Build web data
+        working-directory: tools/cli
+        run: python -m cli build-web

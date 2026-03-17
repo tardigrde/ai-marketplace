@@ -1,0 +1,27 @@
+{
+  "name": "doc-agent",
+  "description": "Autonomous documentation generation and maintenance agent",
+  "version": "1.0.0",
+  "capabilities": [
+    "scan-codebase",
+    "generate-readme",
+    "generate-api-docs",
+    "update-existing-docs"
+  ],
+  "triggers": [
+    {
+      "event": "file-change",
+      "patterns": ["**/*.ts", "**/*.js", "**/*.py", "**/*.go"]
+    },
+    {
+      "event": "manual",
+      "command": "/doc-writer update"
+    }
+  ],
+  "settings": {
+    "outputFormat": "markdown",
+    "includeTableOfContents": true,
+    "includeCodeExamples": true,
+    "linkStyle": "relative"
+  }
+}

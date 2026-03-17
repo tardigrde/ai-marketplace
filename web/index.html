@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Plugin Marketplace</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>AI Plugin Marketplace</h1>
+    <p class="subtitle">Universal plugins for Copilot CLI, Claude Code, Cursor &amp; Windsurf</p>
+    <button id="theme-toggle" aria-label="Toggle theme">Toggle theme</button>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input
+        type="text"
+        id="search"
+        placeholder="Search plugins by name, description, or keyword..."
+        autocomplete="off"
+      >
+      <div id="categories" class="categories"></div>
+    </div>
+    <div id="plugin-grid" class="plugin-grid"></div>
+    <p id="no-results" class="no-results" hidden>No plugins match your search.</p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
