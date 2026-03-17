@@ -16,7 +16,7 @@ console = Console()
 def build_web():
     """Generate web/plugins.json from marketplace manifest."""
     marketplace_path = resolve_marketplace_path()
-    project_root = marketplace_path.parent.parent.parent
+    project_root = marketplace_path.parent.parent
     web_dir = project_root / "web"
 
     try:
@@ -29,22 +29,34 @@ def build_web():
     web_plugins = []
 
     for entry in manifest.plugins:
+        plugin_dir = (project_root / entry.source).resolve()
+
         plugin = {
             "name": entry.name,
-            "version": entry.version,
-            "description": entry.description,
-            "author": entry.author,
-            "category": entry.category,
-            "keywords": entry.keywords,
+            "version": entry.version or "1.0.0",
+            "description": entry.description or "",
+            "category": entry.category or "general",
+            "keywords": entry.keywords or [],
         }
 
-        # Read SKILL.md frontmatter for enhanced descriptions
-        plugin_dir = (project_root / entry.entry).parent
-        skill_path = plugin_dir / "skills" / "SKILL.md"
-        if skill_path.exists():
-            fm = parse_frontmatter(skill_path.read_text())
-            if fm:
-                plugin["skillDescription"] = fm["description"]
+        # Read skill descriptions from SKILL.md frontmatter
+        skills_dir = plugin_dir / "skills"
+        skill_descriptions = []
+        if skills_dir.exists():
+            for skill_dir in sorted(skills_dir.iterdir()):
+                if not skill_dir.is_dir():
+                    continue
+                skill_path = skill_dir / "SKILL.md"
+                if skill_path.exists():
+                    fm = parse_frontmatter(skill_path.read_text())
+                    if fm:
+                        skill_descriptions.append(fm["description"])
+        plugin["skills"] = skill_descriptions
+
+        # Check for agent
+        agents_dir = plugin_dir / "agents"
+        if agents_dir.exists():
+            plugin["hasAgent"] = any(agents_dir.iterdir())
 
         web_plugins.append(plugin)
 

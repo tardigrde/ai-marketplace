@@ -36,8 +36,8 @@ def list_cmd(search: str | None, category: str | None, json_output: bool):
             p
             for p in plugins
             if q in p.name.lower()
-            or q in p.description.lower()
-            or any(q in k.lower() for k in p.keywords)
+            or (p.description and q in p.description.lower())
+            or any(q in k.lower() for k in (p.keywords or []))
         ]
 
     # Filter by category
@@ -61,7 +61,7 @@ def list_cmd(search: str | None, category: str | None, json_output: bool):
     table.add_column("Description")
 
     for p in plugins:
-        table.add_row(p.name, p.version, p.category, p.description)
+        table.add_row(p.name, p.version or "-", p.category or "-", p.description or "-")
 
     console.print()
     console.print(table)

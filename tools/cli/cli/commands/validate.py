@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import click
@@ -18,7 +19,7 @@ def validate(path_opt: str | None):
     marketplace_path = resolve_marketplace_path(path_opt)
     base_dir = marketplace_path.parent
 
-    console.print("[blue]Validating marketplace manifest...[/blue]")
+    console.print("[blue]Validating Claude Code marketplace manifest...[/blue]")
     console.print(f"  [dim]Path: {marketplace_path}[/dim]")
 
     if not marketplace_path.exists():
@@ -34,19 +35,21 @@ def validate(path_opt: str | None):
         raise SystemExit(1)
 
     console.print("  [green]OK: marketplace.json is valid[/green]")
+    console.print(f"  [dim]Marketplace: {manifest.name} (by {manifest.owner.name})[/dim]")
 
     # Validate each plugin
     all_passed = True
-    project_root = base_dir.parent.parent
+    project_root = base_dir.parent
 
     for entry in manifest.plugins:
-        plugin_dir = (project_root / entry.entry).parent
+        plugin_dir = (project_root / entry.source).resolve()
         console.print(f"\n[blue]Validating plugin: {entry.name}[/blue]")
+        console.print(f"  [dim]Source: {entry.source}[/dim]")
 
-        # Check plugin.json
-        plugin_json_path = plugin_dir / "plugin.json"
+        # Check .claude-plugin/plugin.json
+        plugin_json_path = plugin_dir / ".claude-plugin" / "plugin.json"
         if not plugin_json_path.exists():
-            console.print(f"  [red]ERROR: plugin.json not found at {plugin_json_path}[/red]")
+            console.print(f"  [red]ERROR: .claude-plugin/plugin.json not found[/red]")
             all_passed = False
             continue
 
@@ -58,54 +61,61 @@ def validate(path_opt: str | None):
             all_passed = False
             continue
 
-        console.print("  [green]OK: plugin.json is valid[/green]")
+        console.print("  [green]OK: .claude-plugin/plugin.json is valid[/green]")
 
-        # Check SKILL.md files
-        for skill_rel in plugin.skills:
-            skill_file = plugin_dir / skill_rel
-            if not skill_file.exists():
-                console.print(f"  [red]ERROR: Skill file not found: {skill_rel}[/red]")
-                all_passed = False
-                continue
-
-            content = skill_file.read_text()
-            fm = parse_frontmatter(content)
-            if not fm:
-                console.print(f"  [red]ERROR: Missing or invalid frontmatter in {skill_rel}[/red]")
-                all_passed = False
-                continue
-
-            try:
-                SkillFrontmatter.model_validate(fm)
-            except Exception:
-                console.print(f"  [red]ERROR: Invalid frontmatter in {skill_rel}[/red]")
-                all_passed = False
-                continue
-
-            console.print(f"  [green]OK: {skill_rel} frontmatter is valid[/green]")
-
-        # Check commands
-        for cmd_rel in plugin.commands or []:
-            cmd_file = plugin_dir / cmd_rel
-            if not cmd_file.exists():
-                console.print(f"  [red]ERROR: Command file not found: {cmd_rel}[/red]")
-                all_passed = False
-            else:
-                console.print(f"  [green]OK: {cmd_rel} exists[/green]")
-
-        # Check agents
-        for agent_rel in plugin.agents or []:
-            agent_file = plugin_dir / agent_rel
-            if not agent_file.exists():
-                console.print(f"  [red]ERROR: Agent file not found: {agent_rel}[/red]")
-                all_passed = False
-            else:
-                try:
-                    read_json(agent_file)
-                    console.print(f"  [green]OK: {agent_rel} is valid JSON[/green]")
-                except Exception:
-                    console.print(f"  [red]ERROR: Invalid JSON in {agent_rel}[/red]")
+        # Check for skill directories
+        skills_dir = plugin_dir / "skills"
+        if skills_dir.exists():
+            for skill_dir in sorted(skills_dir.iterdir()):
+                if not skill_dir.is_dir():
+                    continue
+                skill_file = skill_dir / "SKILL.md"
+                if not skill_file.exists():
+                    console.print(f"  [red]ERROR: Missing SKILL.md in skills/{skill_dir.name}/[/red]")
                     all_passed = False
+                    continue
+
+                content = skill_file.read_text()
+                fm = parse_frontmatter(content)
+                if not fm:
+                    console.print(f"  [red]ERROR: Missing or invalid frontmatter in skills/{skill_dir.name}/SKILL.md[/red]")
+                    all_passed = False
+                    continue
+
+                try:
+                    SkillFrontmatter.model_validate(fm)
+                except Exception:
+                    console.print(f"  [red]ERROR: Invalid frontmatter in skills/{skill_dir.name}/SKILL.md[/red]")
+                    all_passed = False
+                    continue
+
+                console.print(f"  [green]OK: skills/{skill_dir.name}/SKILL.md frontmatter is valid[/green]")
+
+        # Check agents directory
+        agents_dir = plugin_dir / "agents"
+        if agents_dir.exists():
+            for agent_file in sorted(agents_dir.iterdir()):
+                if agent_file.suffix not in (".json", ".md"):
+                    continue
+                if agent_file.suffix == ".json":
+                    try:
+                        read_json(agent_file)
+                        console.print(f"  [green]OK: agents/{agent_file.name} is valid JSON[/green]")
+                    except Exception:
+                        console.print(f"  [red]ERROR: Invalid JSON in agents/{agent_file.name}[/red]")
+                        all_passed = False
+                else:
+                    console.print(f"  [green]OK: agents/{agent_file.name} exists[/green]")
+
+        # Check MCP config
+        mcp_file = plugin_dir / ".mcp.json"
+        if mcp_file.exists():
+            try:
+                read_json(mcp_file)
+                console.print("  [green]OK: .mcp.json is valid[/green]")
+            except Exception:
+                console.print("  [red]ERROR: Invalid JSON in .mcp.json[/red]")
+                all_passed = False
 
     console.print()
     if all_passed:

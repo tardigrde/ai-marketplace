@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-MARKETPLACE_PATH = PROJECT_ROOT / ".github" / "plugin" / "marketplace.json"
+MARKETPLACE_PATH = PROJECT_ROOT / ".claude-plugin" / "marketplace.json"
 OUTPUT_DIR = PROJECT_ROOT / "dist" / "windsurf"
 
 
@@ -33,7 +33,7 @@ def generate_windsurfrules(name: str, body: str) -> str:
 
 def main() -> None:
     if not MARKETPLACE_PATH.exists():
-        print("ERROR: marketplace.json not found. Run from project root.", file=sys.stderr)
+        print("ERROR: marketplace.json not found.", file=sys.stderr)
         sys.exit(1)
 
     marketplace = json.loads(MARKETPLACE_PATH.read_text())
@@ -42,11 +42,16 @@ def main() -> None:
     manifest: dict[str, str] = {}
 
     for entry in marketplace["plugins"]:
-        plugin_dir = (PROJECT_ROOT / entry["entry"]).parent
-        plugin_json = json.loads((plugin_dir / "plugin.json").read_text())
+        plugin_dir = (PROJECT_ROOT / entry["source"]).resolve()
+        skills_dir = plugin_dir / "skills"
 
-        for skill_rel in plugin_json.get("skills", []):
-            skill_path = plugin_dir / skill_rel
+        if not skills_dir.exists():
+            continue
+
+        for skill_dir in sorted(skills_dir.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+            skill_path = skill_dir / "SKILL.md"
             if not skill_path.exists():
                 continue
 
@@ -55,12 +60,13 @@ def main() -> None:
             if not parsed:
                 continue
 
-            name, body = parsed
-            windsurf_content = generate_windsurfrules(name, body)
-            out_path = OUTPUT_DIR / f"{entry['name']}.windsurfrules"
+            skill_name, body = parsed
+            windsurf_content = generate_windsurfrules(skill_name, body)
+            out_name = f"{entry['name']}_{skill_name}"
+            out_path = OUTPUT_DIR / f"{out_name}.windsurfrules"
             out_path.write_text(windsurf_content)
-            manifest[entry["name"]] = f"{entry['name']}.windsurfrules"
-            print(f"  Generated: dist/windsurf/{entry['name']}.windsurfrules")
+            manifest[out_name] = f"{out_name}.windsurfrules"
+            print(f"  Generated: dist/windsurf/{out_name}.windsurfrules")
 
     (OUTPUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"\nDone. {len(manifest)} .windsurfrules file(s) generated.")

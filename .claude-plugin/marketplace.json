@@ -1,1 +1,20 @@
-../.github/plugin/marketplace.json
+{
+  "name": "ai-plugin-marketplace",
+  "owner": {
+    "name": "marketplace-team"
+  },
+  "metadata": {
+    "description": "Universal AI plugin marketplace for Claude Code, Copilot CLI, Cursor, and Windsurf",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "swe",
+      "source": "./plugins/swe",
+      "description": "Software engineering toolkit with code review, testing, and documentation skills",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": ["review", "test", "docs", "code-quality", "tdd"]
+    }
+  ]
+}

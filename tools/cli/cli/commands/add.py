@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from cli.schema import MarketplaceEntry, MarketplaceManifest
+from cli.schema import MarketplaceManifest, MarketplacePluginEntry
 from cli.utils import read_json, resolve_marketplace_path
 
 console = Console()
@@ -15,13 +15,12 @@ console = Console()
 @click.command()
 @click.option("--name", "-n", required=True, help="Plugin name")
 @click.option("--description", "-d", default=None, help="Plugin description")
-@click.option("--author", "-a", default=None, help="Plugin author")
 @click.option("--category", "-c", default=None, help="Plugin category")
 @click.option("--init", "init_skeleton", is_flag=True, help="Scaffold a new plugin skeleton")
-def add(name: str, description: str | None, author: str | None, category: str | None, init_skeleton: bool):
+def add(name: str, description: str | None, category: str | None, init_skeleton: bool):
     """Add a plugin entry to marketplace.json."""
     marketplace_path = resolve_marketplace_path()
-    project_root = marketplace_path.parent.parent.parent
+    project_root = marketplace_path.parent.parent
 
     # Read existing marketplace
     try:
@@ -37,9 +36,8 @@ def add(name: str, description: str | None, author: str | None, category: str | 
         raise SystemExit(1)
 
     plugin_dir = project_root / "plugins" / name
-    entry = f"plugins/{name}/plugin.json"
+    source = f"./plugins/{name}"
     description = description or f"Description for {name}"
-    author = author or "your-name"
     category = category or "general"
 
     # Optionally scaffold plugin skeleton
@@ -48,23 +46,15 @@ def add(name: str, description: str | None, author: str | None, category: str | 
             console.print(f"[red]ERROR: Directory already exists: {plugin_dir}[/red]")
             raise SystemExit(1)
 
-        skills_dir = plugin_dir / "skills"
+        claude_plugin_dir = plugin_dir / ".claude-plugin"
+        skills_dir = plugin_dir / "skills" / name
+        claude_plugin_dir.mkdir(parents=True)
         skills_dir.mkdir(parents=True)
 
         plugin_json = {
             "name": name,
-            "version": "0.1.0",
             "description": description,
-            "author": author,
-            "category": category,
-            "keywords": [name],
-            "skills": ["skills/SKILL.md"],
-            "compatibility": {
-                "copilot-cli": ">=1.0.0",
-                "claude-code": ">=1.0.0",
-                "cursor": True,
-                "windsurf": True,
-            },
+            "version": "0.1.0",
         }
 
         skill_md = f"""---
@@ -77,7 +67,7 @@ description: {description}
 Write your skill instructions here.
 """
 
-        (plugin_dir / "plugin.json").write_text(json.dumps(plugin_json, indent=2) + "\n")
+        (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json, indent=2) + "\n")
         (skills_dir / "SKILL.md").write_text(skill_md)
         console.print(f"  [green]Created plugin skeleton at plugins/{name}/[/green]")
 
@@ -86,12 +76,11 @@ Write your skill instructions here.
     plugins.append(
         {
             "name": name,
-            "version": "0.1.0",
+            "source": source,
             "description": description,
-            "author": author,
+            "version": "0.1.0",
             "category": category,
             "keywords": [name],
-            "entry": entry,
         }
     )
 

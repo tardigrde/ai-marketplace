@@ -1,89 +1,90 @@
 # AI Plugin Marketplace
 
-A universal plugin marketplace that works natively with **GitHub Copilot CLI** and **Claude Code**, with adapter scripts for **Cursor** and **Windsurf**.
-
-Copilot CLI and Claude Code share the same `marketplace.json` schema — one manifest, two harnesses.
+A universal plugin marketplace that works natively with **Claude Code**, with adapters for **GitHub Copilot CLI**, **Cursor**, and **Windsurf**.
 
 ## Compatibility
 
 | Platform | Support | Method |
 |---|---|---|
-| GitHub Copilot CLI | Native | `.github/plugin/marketplace.json` |
-| Claude Code | Native | `.claude-plugin/marketplace.json` (symlink) |
-| Cursor | Adapter | `.cursorrules` files via `tools/adapters/cursor.py` |
-| Windsurf | Adapter | `.windsurfrules` files via `tools/adapters/windsurf.py` |
+| Claude Code | Native | `.claude-plugin/marketplace.json` |
+| GitHub Copilot CLI | Adapter | `python tools/adapters/copilot-cli.py` |
+| Cursor | Adapter | `python tools/adapters/cursor.py` |
+| Windsurf | Adapter | `python tools/adapters/windsurf.py` |
 
 ## Quick Start
 
-### For Consumers
+### Install in Claude Code
 
-Add this marketplace to your AI tool configuration:
-
-**Copilot CLI / Claude Code** — reference this repo's `marketplace.json` in your tool's plugin config.
-
-**Cursor** — generate `.cursorrules` files:
-```bash
-python tools/adapters/cursor.py
-# Output: dist/cursor/*.cursorrules
+```shell
+/plugin marketplace add https://github.com/tardigrde/ai-marketplace
+/plugin install swe@ai-plugin-marketplace
 ```
 
-**Windsurf** — generate `.windsurfrules` files:
+### Generate adapter files
+
 ```bash
+# Copilot CLI
+python tools/adapters/copilot-cli.py
+# Output: dist/copilot-cli/marketplace.json
+
+# Cursor
+python tools/adapters/cursor.py
+# Output: dist/cursor/*.cursorrules
+
+# Windsurf
 python tools/adapters/windsurf.py
 # Output: dist/windsurf/*.windsurfrules
 ```
 
-### Available Plugins
+## Available Plugins
 
-| Plugin | Category | Description |
-|---|---|---|
-| code-reviewer | code-quality | AI-powered code review with best practices and security checks |
-| test-generator | testing | Automatically generate unit tests from your source code |
-| doc-writer | documentation | Generate and maintain project documentation automatically |
-| git-helper | git | Smart git operations with conventional commit support |
+### swe — Software Engineering Toolkit
+
+Skills:
+- **code-review** — Review code for bugs, security, and best practices
+- **test-generator** — Generate unit tests from source code
+- **doc-writer** — Generate and update documentation
+
+Agent: **swe-agent** — Orchestrates review, testing, and documentation
 
 ## CLI Tool
 
-The CLI tool lives in `tools/cli/` and provides commands for managing the marketplace.
-
-### Setup
+The CLI lives in `tools/cli/` (Python, click + pydantic + rich).
 
 ```bash
 cd tools/cli
 pip install -r requirements.txt
 ```
 
-### Commands
+**Commands:**
 
-**Validate** — Check marketplace manifest and all plugins:
 ```bash
-python -m cli validate --path ../../.github/plugin/marketplace.json
-```
+# Validate marketplace and all plugins
+python -m cli validate
 
-**List** — View all plugins:
-```bash
+# List plugins with search/filter
 python -m cli list
-python -m cli list --search test
-python -m cli list --category git --json
-```
+python -m cli list --search review
+python -m cli list --json
 
-**Add** — Add a new plugin entry:
-```bash
+# Add a new plugin (optionally scaffold)
 python -m cli add --name my-plugin --description "Does X" --init
-```
 
-**Build Web** — Generate data for the web UI:
-```bash
+# Generate web/plugins.json for the web UI
 python -m cli build-web
 ```
 
 ## Web UI
 
-Open `web/index.html` in a browser to browse plugins with search and category filtering. Run `cli build-web` first to generate `web/plugins.json`.
+Open `web/index.html` in a browser (or visit the GitHub Pages site) to browse plugins with search and category filtering.
+
+```bash
+python -m cli build-web  # generate data first
+```
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the step-by-step plugin contribution guide.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

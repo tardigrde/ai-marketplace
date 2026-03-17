@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 from pathlib import Path
 
@@ -37,4 +36,4 @@ def resolve_marketplace_path(path: str | None = None) -> Path:
     if path:
         return Path(path).resolve()
     root = find_project_root()
-    return root / ".github" / "plugin" / "marketplace.json"
+    return root / ".claude-plugin" / "marketplace.json"

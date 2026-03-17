@@ -12,27 +12,25 @@ Thank you for contributing! This guide walks you through adding a new plugin to 
 ### 1. Fork and clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-plugin-marketplace.git
-cd ai-plugin-marketplace
+git clone https://github.com/YOUR_USERNAME/ai-marketplace.git
+cd ai-marketplace
 ```
 
 ### 2. Scaffold your plugin
 
-Use the CLI tool to generate the plugin skeleton:
-
 ```bash
 cd tools/cli
 pip install -r requirements.txt
-python -m cli add --name my-plugin --description "What your plugin does" --author your-name --category general --init
+python -m cli add --name my-plugin --description "What your plugin does" --category general --init
 ```
 
 This creates:
-- `plugins/my-plugin/plugin.json` — Plugin manifest
-- `plugins/my-plugin/skills/SKILL.md` — Skill instructions with frontmatter
+- `plugins/my-plugin/.claude-plugin/plugin.json` — Plugin manifest
+- `plugins/my-plugin/skills/my-plugin/SKILL.md` — Skill instructions with frontmatter
 
 ### 3. Edit SKILL.md
 
-Write clear, actionable instructions in the skill file. The YAML frontmatter must include:
+The YAML frontmatter must include:
 
 ```yaml
 ---
@@ -41,42 +39,51 @@ description: A clear one-line description
 ---
 ```
 
-The body should contain detailed instructions for the AI agent.
+The body contains instructions for the AI agent.
 
-### 4. Optional features
+### 4. Add more skills (optional)
 
-**Commands** — Add slash commands in `commands/`:
-```
-plugins/my-plugin/commands/my-command.md
-```
-Include YAML frontmatter with `name`, `description`, and optional `argument-hint`.
+Create additional skill directories under `skills/`:
 
-**Agents** — Add autonomous agents in `agents/`:
 ```
-plugins/my-plugin/agents/my-agent.json
+plugins/my-plugin/skills/
+├── my-plugin/SKILL.md      # default skill
+└── extra-skill/SKILL.md    # additional skill
 ```
-Include `name`, `description`, `capabilities`, and `triggers`.
 
-**MCP Servers** — Add MCP server config to `plugin.json`:
+### 5. Add an agent (optional)
+
+Create `agents/my-agent.json`:
+
 ```json
 {
-  "mcpServers": {
-    "my-server": {
-      "command": "npx",
-      "args": ["-y", "my-mcp-server"]
-    }
+  "name": "my-agent",
+  "description": "What the agent does",
+  "capabilities": ["do-thing-a", "do-thing-b"]
+}
+```
+
+### 6. Add MCP servers (optional)
+
+Create `.mcp.json` at plugin root:
+
+```json
+{
+  "my-server": {
+    "command": "npx",
+    "args": ["-y", "my-mcp-server"]
   }
 }
 ```
 
-### 5. Validate your plugin
+### 7. Validate your plugin
 
 ```bash
 cd tools/cli
-python -m cli validate --path ../../.github/plugin/marketplace.json
+python -m cli validate
 ```
 
-### 6. Submit a Pull Request
+### 8. Submit a Pull Request
 
 1. Create a feature branch: `git checkout -b add-my-plugin`
 2. Commit your changes: `git commit -m "feat: add my-plugin"`
@@ -87,13 +94,12 @@ python -m cli validate --path ../../.github/plugin/marketplace.json
 - **Single responsibility** — Each plugin should do one thing well
 - **Clear instructions** — SKILL.md should be self-contained and actionable
 - **Keywords** — Use relevant keywords for discoverability
-- **Compatibility** — Declare which platforms your plugin supports
 - **Version** — Start at `0.1.0`, use semver for updates
 
 ## Code Style
 
 - Python 3.11+ for CLI and adapters
-- Use `click` for CLI commands, `rich` for output, `pydantic` for validation
+- `click` for CLI, `rich` for output, `pydantic` for validation
 - 4-space indentation (PEP 8)
 - Type hints encouraged
 

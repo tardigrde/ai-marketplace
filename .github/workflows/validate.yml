@@ -22,7 +22,7 @@ jobs:
 
       - name: Validate marketplace
         working-directory: tools/cli
-        run: python -m cli validate --path ../../.github/plugin/marketplace.json
+        run: python -m cli validate
 
       - name: List plugins
         working-directory: tools/cli

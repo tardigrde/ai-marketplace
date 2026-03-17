@@ -32,7 +32,7 @@
       render();
     })
     .catch(function () {
-      grid.innerHTML = '<p class="no-results">Failed to load plugins. Run <code>marketplace build-web</code> first.</p>';
+      grid.innerHTML = '<p class="no-results">Failed to load plugins. Run <code>cli build-web</code> first.</p>';
     });
 
   // Search
@@ -72,11 +72,8 @@
     return plugins.filter(function (p) {
       if (activeCategory !== "all" && p.category !== activeCategory) return false;
       if (!q) return true;
-      return (
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        (p.keywords || []).some(function (k) { return k.toLowerCase().includes(q); })
-      );
+      var allText = [p.name, p.description].concat(p.keywords || []).concat(p.skills || []);
+      return allText.some(function (t) { return t.toLowerCase().includes(q); });
     });
   }
 
@@ -94,11 +91,18 @@
         return '<span class="keyword">' + escapeHtml(k) + '</span>';
       }).join("");
 
+      var skills = (p.skills || []).map(function (s) {
+        return '<li>' + escapeHtml(s) + '</li>';
+      }).join("");
+
+      var agentBadge = p.hasAgent ? ' <span class="keyword" style="background:#4361ee;color:#fff">agent</span>' : '';
+
       return (
         '<div class="plugin-card">' +
-          '<h3>' + escapeHtml(p.name) + ' <span class="version">v' + escapeHtml(p.version) + '</span></h3>' +
+          '<h3>' + escapeHtml(p.name) + ' <span class="version">v' + escapeHtml(p.version) + '</span>' + agentBadge + '</h3>' +
           '<p class="description">' + escapeHtml(p.description) + '</p>' +
-          '<p class="meta">by ' + escapeHtml(p.author) + ' &middot; ' + escapeHtml(p.category) + '</p>' +
+          '<p class="meta">' + escapeHtml(p.category) + '</p>' +
+          (skills ? '<ul class="skill-list">' + skills + '</ul>' : '') +
           '<div class="keywords">' + keywords + '</div>' +
         '</div>'
       );

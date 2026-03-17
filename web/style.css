@@ -182,6 +182,24 @@ main {
   font-size: 0.72rem;
 }
 
+.skill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.skill-list li {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.15rem 0;
+}
+
+.skill-list li::before {
+  content: "skill: ";
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .no-results {
   text-align: center;
   color: var(--text-muted);
