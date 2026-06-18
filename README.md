@@ -44,6 +44,8 @@ Skills:
 - **code-review** — Review code for bugs, security, and best practices
 - **test-generator** — Generate unit tests from source code
 - **doc-writer** — Generate and update documentation
+- **grill-me** — Relentlessly interview about a plan until shared understanding is reached
+- **autoreview** — Structured closeout review using Codex/Claude with security and findings tracking
 
 Agent: **swe-agent** — Orchestrates review, testing, and documentation
 
@@ -85,6 +87,10 @@ python -m cli build-web  # generate data first
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Acknowledgements
+
+Some skills adapted from [mattpocock/skills](https://github.com/mattpocock/skills) and [steipete/agent-scripts](https://github.com/steipete/agent-scripts) (MIT License).
 
 ## License
 
