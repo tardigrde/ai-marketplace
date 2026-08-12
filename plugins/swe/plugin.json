@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "swe",
+  "version": "1.1.0",
+  "description": "Software engineering toolkit: code review, test generation, documentation, plan grilling, and closeout reviews.",
+  "author": {
+    "name": "Levente Csőke",
+    "url": "https://github.com/tardigrde"
+  },
+  "homepage": "https://github.com/tardigrde/ai-marketplace",
+  "repository": "https://github.com/tardigrde/ai-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "swe",
+    "code-review",
+    "test-generation",
+    "documentation",
+    "skills"
+  ]
+}

@@ -84,6 +84,24 @@ Open `web/index.html` in a browser (or visit the GitHub Pages site) to browse pl
 python -m cli build-web  # generate data first
 ```
 
+## Agent Plugins 1.0.0
+
+`plugins/swe` is also a valid [Agent Plugins 1.0.0](https://agent-plugins.org)
+package: `plugin.json` + `skills/<name>/SKILL.md` + `mcp.json` (Context7, no
+auth). Clients that follow the spec (e.g. the Agentic Chat Obsidian plugin)
+install it into their plugins folder and get the same skills plus the MCP
+server.
+
+```bash
+# Install into an Agent Plugins client vault
+mkdir -p <vault>/.agentic-plugins
+cp -r plugins/swe <vault>/.agentic-plugins/
+```
+
+Keep the package spec-conformant when adding skills: the frontmatter `name`
+must match the skill directory and stay lowercase-hyphen; the `description`
+must not exceed 1024 characters.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
